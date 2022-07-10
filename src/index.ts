@@ -284,6 +284,12 @@ async function schedule2(data:any) {
     });
     const metadataUrl = await getSignedUrl(s3, command, { expiresIn: Number(process.env.S3_URL_EXPIRY) });
 
+    const commandTFLite = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET,
+      Key: `${data.task_name}/${data.tf_lite_metadata}`,
+    });
+    const metadataTFLite = await getSignedUrl(s3, commandTFLite, { expiresIn: Number(process.env.S3_URL_EXPIRY) });
+
     for (let [i, dev] of devicesList.entries()) {
       //console.log("dev",dev);
       //  Get device socket
@@ -306,6 +312,8 @@ async function schedule2(data:any) {
         data_type: "csv",
         data_type_params: "a=k",
         devices_list: otherDevicesList,
+        is_tf_lite: data.is_tf_lite,
+        tf_lite_metadata:metadataTFLite
       };
       //console.log("data1",data1)
       if (socket) {
