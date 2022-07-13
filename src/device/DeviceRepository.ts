@@ -10,6 +10,7 @@ interface Device {
   address: string;
   status: DeviceStatus;
   last_login: Date;
+  memMeg : String
 }
 
 @Singleton
@@ -64,7 +65,7 @@ export class DeviceRepository
 		{
 			await session.writeTransaction(tx =>
 				tx.run(
-					"CREATE (newDevice:DEVICE) SET newDevice.id = $id, newDevice.address = $address, newDevice.status = $status, newDevice.last_login = $last_login",
+					"CREATE (newDevice:DEVICE) SET newDevice.id = $id, newDevice.address = $address, newDevice.status = $status, newDevice.last_login = $last_login, newDevice.memMeg = $memMeg",
 					{
 						...device,
 						last_login: neo4j.types.DateTime.fromStandardDate(device.last_login),
@@ -79,6 +80,29 @@ export class DeviceRepository
 		{
 			session.close();
 		}
+	}
+
+	public async getAllDevices()
+	{
+		const session = (new DBClient()).getSession();
+		let devices: Device[] = [];
+
+		try
+		{
+			const res = await session.readTransaction(tx => 
+                tx.run("MATCH (d:DEVICE)  RETURN d ")    
+            );
+            devices = res.records.map(record => ({
+                ...record.get('d').properties,
+            }))
+		} catch (err)
+		{
+			console.error(`Neo4j GET devices Error: `, err);
+		} finally
+		{
+			session.close();
+		}
+		return devices;
 	}
 
 	public async updateDevice(device: Partial<Device>)
