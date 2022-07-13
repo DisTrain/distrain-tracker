@@ -10,6 +10,7 @@ interface Device {
   address: string;
   status: DeviceStatus;
   last_login: Date;
+  memMeg : String
 }
 
 @Singleton
@@ -64,7 +65,7 @@ export class DeviceRepository
 		{
 			await session.writeTransaction(tx =>
 				tx.run(
-					"CREATE (newDevice:DEVICE) SET newDevice.id = $id, newDevice.address = $address, newDevice.status = $status, newDevice.last_login = $last_login",
+					"CREATE (newDevice:DEVICE) SET newDevice.id = $id, newDevice.address = $address, newDevice.status = $status, newDevice.last_login = $last_login, newDevice.memMeg = $memMeg",
 					{
 						...device,
 						last_login: neo4j.types.DateTime.fromStandardDate(device.last_login),

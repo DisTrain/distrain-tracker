@@ -170,6 +170,7 @@ wss.on("listening", () => {
 wss.on("connection", async (ws, req) => {
   let deviceId = <string>req.headers["x-device-id"] || "";
   let deviceAddress = <string>req.headers["x-device-address"] || "";
+  let availableMemMegs = <string>req.headers["x-device-mem"] || "";
 
   if (deviceId === "" || deviceId === null || deviceId === undefined || true) {
     deviceId = uuid();
@@ -179,6 +180,7 @@ wss.on("connection", async (ws, req) => {
       status: "idle",
       last_login: new Date(Date.now()),
       address: deviceAddress,
+      memMeg: availableMemMegs
     });
     ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
   } else {
