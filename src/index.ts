@@ -198,6 +198,7 @@ async function schedule() {
           // Send the work message
           const msg = new WorkMessage(socket, JSON.stringify(data));
           msg.handle();
+					await deviceRepo.setStatus(dev.id, "busy");
           // construct device mesh of network
           await deviceRepo.connectDeviceToTask(dev.id, minTask.id, dev.number);
           // connect working devices to their task
