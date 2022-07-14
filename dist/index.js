@@ -38,12 +38,9 @@ dotenv_1.default.config();
 //   });
 const port = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
-const wss = new ws_1.WebSocket.Server({ port });
 const deviceRepo = new DeviceRepository_1.DeviceRepository(process.env.REDIS_URL);
 const taskRepo = new TaskRepository_1.TaskRepository();
 const s3 = new client_s3_1.S3Client({ region: "us-west-2" });
-// Disconnect all devices
-deviceRepo.resetAllDevicesStatus();
 const requestListener = function (req, res) {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -159,7 +156,10 @@ const requestListener = function (req, res) {
         }));
     }
 };
+// Disconnect all devices
+deviceRepo.resetAllDevicesStatus();
 const httpServer = http_1.default.createServer(requestListener);
+const wss = new ws_1.WebSocket.Server({ server: httpServer });
 httpServer.listen(apiPort, () => {
     console.log(`API Listening on port ${apiPort}`);
 });

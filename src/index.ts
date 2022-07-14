@@ -29,14 +29,10 @@ dotenv.config();
 
 const port: number = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort: number = +(process.env.PORT ? process.env.PORT : 8000);
-const wss = new WebSocket.Server({ port });
 const deviceRepo = new DeviceRepository(process.env.REDIS_URL);
+
 const taskRepo: TaskRepository = new TaskRepository();
 const s3 = new S3Client({ region: "us-west-2" });
-
-// Disconnect all devices
-deviceRepo.resetAllDevicesStatus();
-
 const requestListener = function (req: IncomingMessage, res: ServerResponse) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -157,7 +153,13 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
   }
 };
 
+// Disconnect all devices
+deviceRepo.resetAllDevicesStatus();
+
+
+
 const httpServer = http.createServer(requestListener);
+const wss = new WebSocket.Server({ server:httpServer });
 
 httpServer.listen(apiPort, () => {
   console.log(`API Listening on port ${apiPort}`);
