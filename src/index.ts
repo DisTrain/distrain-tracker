@@ -30,7 +30,7 @@ dotenv.config();
 const port: number = +(process.env.PORT ? process.env.PORT : 9001);
 const apiPort: number = +(process.env.API_PORT ? process.env.API_PORT : 8000);
 const wss = new WebSocket.Server({ port });
-const deviceRepo = new DeviceRepository(undefined);
+const deviceRepo = new DeviceRepository(process.env.REDIS_URL);
 const taskRepo: TaskRepository = new TaskRepository();
 const s3 = new S3Client({ region: "us-west-2" });
 
