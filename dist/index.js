@@ -40,7 +40,10 @@ const port = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
 const deviceRepo = new DeviceRepository_1.DeviceRepository(process.env.REDIS_URL);
 const taskRepo = new TaskRepository_1.TaskRepository();
-const s3 = new client_s3_1.S3Client({ region: "us-west-2" });
+const s3 = new client_s3_1.S3Client({ region: "us-west-2", credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID ? process.env.AWS_ACCESS_KEY_ID : "",
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : ""
+    } });
 const requestListener = function (req, res) {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Access-Control-Allow-Origin", "*");
