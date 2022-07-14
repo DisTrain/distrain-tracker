@@ -27,8 +27,8 @@ dotenv.config();
 //     res.end("WOW");
 //   });
 
-const port: number = +(process.env.PORT ? process.env.PORT : 9001);
-const apiPort: number = +(process.env.API_PORT ? process.env.API_PORT : 8000);
+const port: number = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
+const apiPort: number = +(process.env.PORT ? process.env.PORT : 8000);
 const wss = new WebSocket.Server({ port });
 const deviceRepo = new DeviceRepository(process.env.REDIS_URL);
 const taskRepo: TaskRepository = new TaskRepository();
@@ -159,12 +159,12 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
 
 const httpServer = http.createServer(requestListener);
 
-httpServer.listen(process.env.API_PORT, () => {
+httpServer.listen(apiPort, () => {
   console.log(`API Listening on port ${apiPort}`);
 });
 
 wss.on("listening", () => {
-  console.log(`Listening on port ${port}`);
+  console.log(`Listening on port ${process.env.SOCKET_PORT}`);
 });
 
 wss.on("connection", async (ws, req) => {

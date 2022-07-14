@@ -36,8 +36,8 @@ dotenv_1.default.config();
 //     console.log("Request!");
 //     res.end("WOW");
 //   });
-const port = +(process.env.PORT ? process.env.PORT : 9001);
-const apiPort = +(process.env.API_PORT ? process.env.API_PORT : 8000);
+const port = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
+const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
 const wss = new ws_1.WebSocket.Server({ port });
 const deviceRepo = new DeviceRepository_1.DeviceRepository(process.env.REDIS_URL);
 const taskRepo = new TaskRepository_1.TaskRepository();
@@ -160,11 +160,11 @@ const requestListener = function (req, res) {
     }
 };
 const httpServer = http_1.default.createServer(requestListener);
-httpServer.listen(process.env.API_PORT, () => {
+httpServer.listen(apiPort, () => {
     console.log(`API Listening on port ${apiPort}`);
 });
 wss.on("listening", () => {
-    console.log(`Listening on port ${port}`);
+    console.log(`Listening on port ${process.env.SOCKET_PORT}`);
 });
 wss.on("connection", (ws, req) => __awaiter(void 0, void 0, void 0, function* () {
     let deviceId = req.headers["x-device-id"] || "";
