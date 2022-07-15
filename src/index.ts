@@ -283,7 +283,7 @@ async function schedule() {
 
 async function schedule2(data: any) {
   const devicesList = data.devs.map((d: any, i: number) => ({ number: i, ...d, address: d.ip }));
-  //console.log(devicesList)
+  console.log(devicesList)
   let socket;
   // Generate URL for metadata file
   const command = new GetObjectCommand({
