@@ -29,7 +29,7 @@ dotenv.config();
 
 const port: number = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort: number = +(process.env.PORT ? process.env.PORT : 8000);
-const deviceRepo = new DeviceRepository(process.env.REDIS_URL);
+const deviceRepo = new DeviceRepository(undefined);
 
 const taskRepo: TaskRepository = new TaskRepository();
 const s3 = new S3Client({ region: "us-west-2",credentials:{
@@ -198,7 +198,7 @@ wss.on("connection", async (ws, req) => {
     });
   }
 
-  deviceRepo.setStatus(deviceId, "idle");
+  // deviceRepo.setStatus(deviceId, "idle");
   deviceRepo.setSocket(deviceId, ws);
 
   ws.addEventListener("message", (message: MessageEvent) => {
@@ -265,7 +265,7 @@ async function schedule() {
           // Send the work message
           const msg = new WorkMessage(socket, JSON.stringify(data));
           msg.handle();
-          await deviceRepo.setStatus(dev.id, "busy");
+          //await deviceRepo.setStatus(dev.id, "busy");
           // construct device mesh of network
           await deviceRepo.connectDeviceToTask(dev.id, minTask.id, dev.number);
           // connect working devices to their task
@@ -328,7 +328,7 @@ async function schedule2(data: any) {
       // Send the work message
       const msg = new WorkMessage(socket, JSON.stringify(data1));
       msg.handle();
-      await deviceRepo.setStatus(dev.id, "busy");
+      //await deviceRepo.setStatus(dev.id, "busy");
       // construct device mesh of network
       await deviceRepo.connectDeviceToTask(dev.id, data.task_name, dev.number);
       // connect working devices to their task
