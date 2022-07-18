@@ -13,6 +13,7 @@ export class FinishMessage extends MessageBase {
     super(ws, data);
     this.s3Client = s3Client;
     this.model = data;
+    console.log("created finish message");
   }
 
   handle(): void {
