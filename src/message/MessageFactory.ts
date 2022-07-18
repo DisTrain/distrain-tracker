@@ -8,6 +8,7 @@ export class MessageFactory {
   static createMessage(ws: WebSocket, message: string, s3Client: S3Client): MessageBase | null {
     let msg: MessageBase | null = null;
     console.log(message);
+    console.log("tracker received msg: ", message);
     try {
       const msgJson = JSON.parse(message);
       switch (msgJson["type"]) {

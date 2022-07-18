@@ -7,6 +7,7 @@ class MessageFactory {
     static createMessage(ws, message, s3Client) {
         let msg = null;
         console.log(message);
+        console.log("tracker received msg: ", message);
         try {
             const msgJson = JSON.parse(message);
             switch (msgJson["type"]) {
