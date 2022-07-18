@@ -173,8 +173,8 @@ wss.on("connection", async (ws, req) => {
   deviceRepo.setSocket(deviceId, ws);
 
   ws.addEventListener("message", (message: MessageEvent) => {
-    const msgInstance = MessageFactory.createMessage(ws, <string>message.data, s3);
     console.log("tracker received msg: ", message.data);
+    const msgInstance = MessageFactory.createMessage(ws, <string>message.data, s3);
     msgInstance?.handle();
   });
 
