@@ -23,27 +23,16 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 dotenv_1.default.config();
-/*
-    - respond to trainer with links to upload data and metadata xx
-    - update DB for task and devices status, and construct relations between devices and the task (will have property wich is number of the task), and between each other xx
-    - test
-*/
-// createServer()
-//   .listen(8080, () => {
-//     console.log("HTTP server listening on 8080");
-//   })
-//   .on("request", (req, res) => {
-//     console.log("Request!");
-//     res.end("WOW");
-//   });
-const port = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
 const deviceRepo = new DeviceRepository_1.DeviceRepository(undefined);
 const taskRepo = new TaskRepository_1.TaskRepository();
-const s3 = new client_s3_1.S3Client({ region: "us-west-2", credentials: {
+const s3 = new client_s3_1.S3Client({
+    region: "us-west-2",
+    credentials: {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID ? process.env.AWS_ACCESS_KEY_ID : "",
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : ""
-    } });
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : "",
+    },
+});
 const requestListener = function (req, res) {
     res.setHeader("Content-Type", "application/json");
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -159,7 +148,6 @@ const requestListener = function (req, res) {
         }));
     }
 };
-// Disconnect all devices
 deviceRepo.resetAllDevicesStatus();
 const httpServer = http_1.default.createServer(requestListener);
 const wss = new ws_1.WebSocket.Server({ server: httpServer });
@@ -167,37 +155,26 @@ httpServer.listen(apiPort, () => {
     console.log(`API Listening on port ${apiPort}`);
 });
 wss.on("listening", () => {
-    console.log(`Listening on port ${process.env.SOCKET_PORT}`);
+    console.log(`Socket Listening on port ${apiPort}`);
 });
 wss.on("connection", (ws, req) => __awaiter(void 0, void 0, void 0, function* () {
     let deviceId = req.headers["x-device-id"] || "";
     let deviceAddress = req.headers["x-device-address"] || "";
     let availableMemMegs = req.headers["x-device-mem"] || "";
-    if (deviceId === "" || deviceId === null || deviceId === undefined || true) {
-        deviceId = (0, uuid_1.v4)();
-        console.log("New device: ", deviceId);
-        yield deviceRepo.createDevice({
-            id: deviceId,
-            status: "idle",
-            last_login: new Date(Date.now()),
-            address: deviceAddress,
-            memMeg: availableMemMegs,
-        });
-        ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
-    }
-    else {
-        console.log("Device found before: ", deviceId);
-        yield deviceRepo.updateDevice({
-            id: deviceId,
-            status: "idle",
-            address: deviceAddress,
-            last_login: new Date(Date.now()),
-        });
-    }
-    // deviceRepo.setStatus(deviceId, "idle");
+    deviceId = (0, uuid_1.v4)();
+    console.log("New device: ", deviceId);
+    yield deviceRepo.createDevice({
+        id: deviceId,
+        status: "idle",
+        last_login: new Date(Date.now()),
+        address: deviceAddress,
+        memMeg: availableMemMegs,
+    });
+    ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
     deviceRepo.setSocket(deviceId, ws);
     ws.addEventListener("message", (message) => {
-        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data);
+        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data, s3);
+        console.log("tracker received msg: ", message.data);
         msgInstance === null || msgInstance === void 0 ? void 0 : msgInstance.handle();
     });
     ws.addEventListener("close", ({ code }) => {
@@ -209,7 +186,6 @@ wss.on("connection", (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
         console.log(err);
         deviceRepo.disconnectDevice(deviceId);
     });
-    //await schedule();
 }));
 function schedule() {
     return __awaiter(this, void 0, void 0, function* () {
