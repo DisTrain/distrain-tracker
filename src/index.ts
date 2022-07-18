@@ -6,36 +6,23 @@ import { WebSocket, MessageEvent } from "ws";
 import { v4 as uuid } from "uuid";
 import http, { IncomingMessage, ServerResponse } from "http";
 import dotenv from "dotenv";
-import { createServer } from "http";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 dotenv.config();
 
-/*
-	- respond to trainer with links to upload data and metadata xx
-	- update DB for task and devices status, and construct relations between devices and the task (will have property wich is number of the task), and between each other xx
-	- test
-*/
-
-// createServer()
-//   .listen(8080, () => {
-//     console.log("HTTP server listening on 8080");
-//   })
-//   .on("request", (req, res) => {
-//     console.log("Request!");
-//     res.end("WOW");
-//   });
-
-const port: number = +(process.env.SOCKET_PORT ? process.env.SOCKET_PORT : 9001);
 const apiPort: number = +(process.env.PORT ? process.env.PORT : 8000);
 const deviceRepo = new DeviceRepository(undefined);
-
 const taskRepo: TaskRepository = new TaskRepository();
-const s3 = new S3Client({ region: "us-west-2",credentials:{
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID? process.env.AWS_ACCESS_KEY_ID : "" ,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY? process.env.AWS_SECRET_ACCESS_KEY : ""
-} });
+
+const s3 = new S3Client({
+  region: "us-west-2",
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID ? process.env.AWS_ACCESS_KEY_ID : "",
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ? process.env.AWS_SECRET_ACCESS_KEY : "",
+  },
+});
+
 const requestListener = function (req: IncomingMessage, res: ServerResponse) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -156,20 +143,16 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
   }
 };
 
-// Disconnect all devices
 deviceRepo.resetAllDevicesStatus();
-
-
-
 const httpServer = http.createServer(requestListener);
-const wss = new WebSocket.Server({ server:httpServer });
+const wss = new WebSocket.Server({ server: httpServer });
 
 httpServer.listen(apiPort, () => {
   console.log(`API Listening on port ${apiPort}`);
 });
 
 wss.on("listening", () => {
-  console.log(`Listening on port ${process.env.SOCKET_PORT}`);
+  console.log(`Socket Listening on port ${apiPort}`);
 });
 
 wss.on("connection", async (ws, req) => {
@@ -177,32 +160,20 @@ wss.on("connection", async (ws, req) => {
   let deviceAddress = <string>req.headers["x-device-address"] || "";
   let availableMemMegs = <string>req.headers["x-device-mem"] || "";
 
-  if (deviceId === "" || deviceId === null || deviceId === undefined || true) {
-    deviceId = uuid();
-    console.log("New device: ", deviceId);
-    await deviceRepo.createDevice({
-      id: deviceId,
-      status: "idle",
-      last_login: new Date(Date.now()),
-      address: deviceAddress,
-      memMeg: availableMemMegs,
-    });
-    ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
-  } else {
-    console.log("Device found before: ", deviceId);
-    await deviceRepo.updateDevice({
-      id: deviceId,
-      status: "idle",
-      address: deviceAddress,
-      last_login: new Date(Date.now()),
-    });
-  }
-
-  // deviceRepo.setStatus(deviceId, "idle");
+  deviceId = uuid();
+  console.log("New device: ", deviceId);
+  await deviceRepo.createDevice({
+    id: deviceId,
+    status: "idle",
+    last_login: new Date(Date.now()),
+    address: deviceAddress,
+    memMeg: availableMemMegs,
+  });
+  ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
   deviceRepo.setSocket(deviceId, ws);
 
   ws.addEventListener("message", (message: MessageEvent) => {
-    const msgInstance = MessageFactory.createMessage(ws, <string>message.data);
+    const msgInstance = MessageFactory.createMessage(ws, <string>message.data, s3);
     msgInstance?.handle();
   });
 
@@ -216,8 +187,6 @@ wss.on("connection", async (ws, req) => {
     console.log(err);
     deviceRepo.disconnectDevice(deviceId);
   });
-
-  //await schedule();
 });
 
 async function schedule() {
@@ -283,7 +252,7 @@ async function schedule() {
 
 async function schedule2(data: any) {
   const devicesList = data.devs.map((d: any, i: number) => ({ number: i, ...d, address: d.ip }));
-  console.log(devicesList)
+  console.log(devicesList);
   let socket;
   // Generate URL for metadata file
   const command = new GetObjectCommand({
