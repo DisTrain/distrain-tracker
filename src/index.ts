@@ -150,8 +150,8 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
         pos += chunk.length;
       })
       .on("end", async () => {
-        const data = JSON.parse(buffer.toString());
-        console.log(data);
+        // const data = JSON.parse(buffer.toString());
+        console.log("received msg: ", buffer.toString());
         res.end("done");
       });
   }

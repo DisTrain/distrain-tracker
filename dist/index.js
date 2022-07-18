@@ -157,8 +157,8 @@ const requestListener = function (req, res) {
             pos += chunk.length;
         })
             .on("end", () => __awaiter(this, void 0, void 0, function* () {
-            const data = JSON.parse(buffer.toString());
-            console.log(data);
+            // const data = JSON.parse(buffer.toString());
+            console.log("received msg: ", buffer.toString());
             res.end("done");
         }));
     }
