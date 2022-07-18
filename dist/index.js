@@ -173,8 +173,8 @@ wss.on("connection", (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
     ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
     deviceRepo.setSocket(deviceId, ws);
     ws.addEventListener("message", (message) => {
-        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data, s3);
         console.log("tracker received msg: ", message.data);
+        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data, s3);
         msgInstance === null || msgInstance === void 0 ? void 0 : msgInstance.handle();
     });
     ws.addEventListener("close", ({ code }) => {
