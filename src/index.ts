@@ -174,6 +174,7 @@ wss.on("connection", async (ws, req) => {
 
   ws.addEventListener("message", (message: MessageEvent) => {
     const msgInstance = MessageFactory.createMessage(ws, <string>message.data, s3);
+    console.log("tracker received msg: ", message.data);
     msgInstance?.handle();
   });
 
