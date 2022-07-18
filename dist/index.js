@@ -147,6 +147,21 @@ const requestListener = function (req, res) {
             res.end(JSON.stringify(response));
         }));
     }
+    else if (req.url == "/finish" && req.method === "POST") {
+        const size = parseInt(req.headers["content-length"], 10);
+        const buffer = Buffer.allocUnsafe(size);
+        let pos = 0;
+        req
+            .on("data", (chunk) => {
+            chunk.copy(buffer, pos);
+            pos += chunk.length;
+        })
+            .on("end", () => __awaiter(this, void 0, void 0, function* () {
+            const data = JSON.parse(buffer.toString());
+            console.log(data);
+            res.end("done");
+        }));
+    }
 };
 deviceRepo.resetAllDevicesStatus();
 const httpServer = http_1.default.createServer(requestListener);

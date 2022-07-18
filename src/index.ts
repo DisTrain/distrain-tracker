@@ -140,6 +140,20 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
         await schedule2(data);
         res.end(JSON.stringify(response));
       });
+  } else if (req.url == "/finish" && req.method === "POST") {
+    const size: number = parseInt(req.headers["content-length"]!, 10);
+    const buffer = Buffer.allocUnsafe(size);
+    let pos: number = 0;
+    req
+      .on("data", (chunk) => {
+        chunk.copy(buffer, pos);
+        pos += chunk.length;
+      })
+      .on("end", async () => {
+        const data = JSON.parse(buffer.toString());
+        console.log(data);
+        res.end("done");
+      });
   }
 };
 
