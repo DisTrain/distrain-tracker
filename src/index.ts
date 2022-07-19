@@ -6,7 +6,7 @@ import { WebSocket, MessageEvent } from "ws";
 import { v4 as uuid } from "uuid";
 import http, { IncomingMessage, ServerResponse } from "http";
 import dotenv from "dotenv";
-import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 dotenv.config();
@@ -151,8 +151,23 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
       })
       .on("end", async () => {
         // const data = JSON.parse(buffer.toString());
-        console.log("received msg: ", buffer.toString());
-        res.end("done");
+        const data = buffer.toJSON();
+        console.log("received msg: ", data);
+        // const uploadParams = {
+        //   Bucket: process.env.S3_BUCKET,
+        //   Key: "final_model.json",
+        //   Body: buffer,
+        // };
+
+        // try {
+        //   const data = s3.send(new PutObjectCommand(uploadParams));
+        //   console.log("Successfully uploaded");
+        //   res.end("Successfully uploaded");
+        // } catch (err: any) {
+        //   console.log("There was an error uploading your file");
+        //   res.end("There was an error uploading your file");
+        // }
+        res.end("");
       });
   }
 };

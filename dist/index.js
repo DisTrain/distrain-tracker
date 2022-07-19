@@ -158,8 +158,22 @@ const requestListener = function (req, res) {
         })
             .on("end", () => __awaiter(this, void 0, void 0, function* () {
             // const data = JSON.parse(buffer.toString());
-            console.log("received msg: ", buffer.toString());
-            res.end("done");
+            const data = buffer.toJSON();
+            console.log("received msg: ", data);
+            // const uploadParams = {
+            //   Bucket: process.env.S3_BUCKET,
+            //   Key: "final_model.json",
+            //   Body: buffer,
+            // };
+            // try {
+            //   const data = s3.send(new PutObjectCommand(uploadParams));
+            //   console.log("Successfully uploaded");
+            //   res.end("Successfully uploaded");
+            // } catch (err: any) {
+            //   console.log("There was an error uploading your file");
+            //   res.end("There was an error uploading your file");
+            // }
+            res.end("");
         }));
     }
 };
