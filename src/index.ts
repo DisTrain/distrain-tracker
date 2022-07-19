@@ -8,7 +8,7 @@ import http, { IncomingMessage, ServerResponse } from "http";
 import dotenv from "dotenv";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import formidable from "formidable";
+import formidable, { Fields, Files } from "formidable";
 
 dotenv.config();
 
@@ -143,12 +143,29 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
       });
   } else if (req.url == "/finish" && req.method === "POST") {
     const form = formidable({ multiples: true });
-    form.parse(req, async (err: any, fields: any, files: any) => {
+    form.parse(req, async (err: any, fields: Fields, files: any) => {
       if (err) {
         console.log(err);
       }
+
       console.log(fields);
       console.log(files);
+      const tmp = Buffer.from(files.file, "base64");
+
+      const uploadParams = {
+        Bucket: process.env.S3_BUCKET,
+        Key: <string>fields.filename,
+        Body: tmp,
+      };
+
+      try {
+        const data = s3.send(new PutObjectCommand(uploadParams));
+        console.log("Successfully uploaded");
+        res.end("Successfully uploaded");
+      } catch (err: any) {
+        console.log("There was an error uploading your file");
+        res.end("There was an error uploading your file");
+      }
     });
     // const size: number = parseInt(req.headers["content-length"]!, 10);
     // const buffer = Buffer.allocUnsafe(size);
@@ -163,21 +180,6 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
     //     const data = buffer.toJSON();
 
     //     console.log("received msg: ", data.data);
-
-    //     // const uploadParams = {
-    //     //   Bucket: process.env.S3_BUCKET,
-    //     //   Key: "final_model.json",
-    //     //   Body: buffer,
-    //     // };
-
-    //     // try {
-    //     //   const data = s3.send(new PutObjectCommand(uploadParams));
-    //     //   console.log("Successfully uploaded");
-    //     //   res.end("Successfully uploaded");
-    //     // } catch (err: any) {
-    //     //   console.log("There was an error uploading your file");
-    //     //   res.end("There was an error uploading your file");
-    //     // }
     //     res.end("");
     //   });
   }

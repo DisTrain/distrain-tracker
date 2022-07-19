@@ -156,6 +156,21 @@ const requestListener = function (req, res) {
             }
             console.log(fields);
             console.log(files);
+            const tmp = Buffer.from(files.file, "base64");
+            const uploadParams = {
+                Bucket: process.env.S3_BUCKET,
+                Key: fields.filename,
+                Body: tmp,
+            };
+            try {
+                const data = s3.send(new client_s3_1.PutObjectCommand(uploadParams));
+                console.log("Successfully uploaded");
+                res.end("Successfully uploaded");
+            }
+            catch (err) {
+                console.log("There was an error uploading your file");
+                res.end("There was an error uploading your file");
+            }
         }));
         // const size: number = parseInt(req.headers["content-length"]!, 10);
         // const buffer = Buffer.allocUnsafe(size);
@@ -169,19 +184,6 @@ const requestListener = function (req, res) {
         //     // const data = JSON.parse(buffer.toString());
         //     const data = buffer.toJSON();
         //     console.log("received msg: ", data.data);
-        //     // const uploadParams = {
-        //     //   Bucket: process.env.S3_BUCKET,
-        //     //   Key: "final_model.json",
-        //     //   Body: buffer,
-        //     // };
-        //     // try {
-        //     //   const data = s3.send(new PutObjectCommand(uploadParams));
-        //     //   console.log("Successfully uploaded");
-        //     //   res.end("Successfully uploaded");
-        //     // } catch (err: any) {
-        //     //   console.log("There was an error uploading your file");
-        //     //   res.end("There was an error uploading your file");
-        //     // }
         //     res.end("");
         //   });
     }
