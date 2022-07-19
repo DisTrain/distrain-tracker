@@ -1,7 +1,6 @@
 import { DBClient } from '../common/db';
 import { WebSocket } from 'ws';
 import { Singleton } from "../common/Singleton";
-//import { createClient, RedisClientType } from 'redis'
 import neo4j from 'neo4j-driver';
 import { DeviceStatus, DISCONNECTED } from './DeviceStatus';
 
@@ -16,7 +15,6 @@ interface Device {
 @Singleton
 export class DeviceRepository
 {
-	//private client: RedisClientType;
 	private dbClient: DBClient;
 	private socketStore: Map<string, WebSocket | null>;
 	public devices: Device[];
@@ -27,24 +25,7 @@ export class DeviceRepository
 		this.socketStore = new Map<string, WebSocket | null>();
 		this.dbClient = new DBClient();
 		this.devices = [];
-		// this.client.on('error', (err) =>
-		// {
-		// 	console.error("Redis Client Error: ", err);
-		// });
-
-		//this._connect();
 	}
-
-	// private async _connect()
-	// {
-	// 	try
-	// 	{
-	// 		await this.client.connect();
-	// 	} catch (err)
-	// 	{
-	// 		console.error("Couldn't connect to redis: ", err);
-	// 	}
-	// }
 
 	private _makeEditString(object: Object, varName: string): string
 	{
@@ -126,30 +107,6 @@ export class DeviceRepository
 			session.close();
 		}
 	}
-
-	// public async setStatus(key: string, value: DeviceStatus)
-	// {
-	// 	try
-	// 	{
-
-	// 		await this.client.set(`${key}`, `${value}`);
-	// 	} catch (err)
-	// 	{
-	// 		console.error(`Couldn't set value of ${key} to redis: `, err);
-	// 	}
-	// }
-
-	// public async getStatus(key: string): Promise<DeviceStatus | null>
-	// {
-	// 	try
-	// 	{
-	// 		return await this.client.get(key) as DeviceStatus;
-	// 	} catch (err)
-	// 	{
-	// 		console.error(`Couldn't get value of ${key} from redis: `, err);
-	// 		return null
-	// 	}
-	// }
 
     public async getNIdleDevices(n: number): Promise<Device[]> {
         const session = (new DBClient()).getSession();
@@ -251,7 +208,6 @@ export class DeviceRepository
 		  id: deviceId,
 		  status: "disconnected",
 		});
-		//this.setStatus(deviceId, "disconnected");
 		this.setSocket(deviceId, null);
 	}
 }

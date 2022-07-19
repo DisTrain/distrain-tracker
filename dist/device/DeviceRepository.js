@@ -21,7 +21,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceRepository = void 0;
 const db_1 = require("../common/db");
 const Singleton_1 = require("../common/Singleton");
-//import { createClient, RedisClientType } from 'redis'
 const neo4j_driver_1 = __importDefault(require("neo4j-driver"));
 const DeviceStatus_1 = require("./DeviceStatus");
 let DeviceRepository = class DeviceRepository {
@@ -30,22 +29,7 @@ let DeviceRepository = class DeviceRepository {
         this.socketStore = new Map();
         this.dbClient = new db_1.DBClient();
         this.devices = [];
-        // this.client.on('error', (err) =>
-        // {
-        // 	console.error("Redis Client Error: ", err);
-        // });
-        //this._connect();
     }
-    // private async _connect()
-    // {
-    // 	try
-    // 	{
-    // 		await this.client.connect();
-    // 	} catch (err)
-    // 	{
-    // 		console.error("Couldn't connect to redis: ", err);
-    // 	}
-    // }
     _makeEditString(object, varName) {
         return Object.entries(object)
             .filter(([k, v]) => k !== 'id' && v !== undefined)
@@ -108,27 +92,6 @@ let DeviceRepository = class DeviceRepository {
             }
         });
     }
-    // public async setStatus(key: string, value: DeviceStatus)
-    // {
-    // 	try
-    // 	{
-    // 		await this.client.set(`${key}`, `${value}`);
-    // 	} catch (err)
-    // 	{
-    // 		console.error(`Couldn't set value of ${key} to redis: `, err);
-    // 	}
-    // }
-    // public async getStatus(key: string): Promise<DeviceStatus | null>
-    // {
-    // 	try
-    // 	{
-    // 		return await this.client.get(key) as DeviceStatus;
-    // 	} catch (err)
-    // 	{
-    // 		console.error(`Couldn't get value of ${key} from redis: `, err);
-    // 		return null
-    // 	}
-    // }
     getNIdleDevices(n) {
         return __awaiter(this, void 0, void 0, function* () {
             const session = (new db_1.DBClient()).getSession();
@@ -218,7 +181,6 @@ let DeviceRepository = class DeviceRepository {
             id: deviceId,
             status: "disconnected",
         });
-        //this.setStatus(deviceId, "disconnected");
         this.setSocket(deviceId, null);
     }
 };

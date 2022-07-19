@@ -1,11 +1,9 @@
-import { S3Client } from "@aws-sdk/client-s3";
 import { WebSocket } from "ws";
-import { FinishMessage } from "./FinishMessage";
 import { JoinMessage } from "./JoinMessage";
 import { MessageBase } from "./MessageBase";
 
 export class MessageFactory {
-  static createMessage(ws: WebSocket, message: string, s3Client: S3Client): MessageBase | null {
+  static createMessage(ws: WebSocket, message: string): MessageBase | null {
     let msg: MessageBase | null = null;
     console.log(message);
     console.log("tracker received msg: ", message);
@@ -18,8 +16,6 @@ export class MessageFactory {
         case "work":
           msg = new JoinMessage(ws, msgJson["body"]);
           break;
-        case "finish":
-          msg = new FinishMessage(ws, msgJson["body"], s3Client);
         default:
           break;
       }

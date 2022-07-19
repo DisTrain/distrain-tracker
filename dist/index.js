@@ -175,20 +175,6 @@ const requestListener = function (req, res) {
                 res.end("There was an error uploading your file");
             }
         }));
-        // const size: number = parseInt(req.headers["content-length"]!, 10);
-        // const buffer = Buffer.allocUnsafe(size);
-        // let pos: number = 0;
-        // req
-        //   .on("data", (chunk) => {
-        //     chunk.copy(buffer, pos);
-        //     pos += chunk.length;
-        //   })
-        //   .on("end", async () => {
-        //     // const data = JSON.parse(buffer.toString());
-        //     const data = buffer.toJSON();
-        //     console.log("received msg: ", data.data);
-        //     res.end("");
-        //   });
     }
 };
 deviceRepo.resetAllDevicesStatus();
@@ -216,8 +202,7 @@ wss.on("connection", (ws, req) => __awaiter(void 0, void 0, void 0, function* ()
     ws.send(JSON.stringify({ type: "deviceId", data: deviceId }));
     deviceRepo.setSocket(deviceId, ws);
     ws.addEventListener("message", (message) => {
-        console.log("tracker received msg: ", message.data);
-        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data, s3);
+        const msgInstance = MessageFactory_1.MessageFactory.createMessage(ws, message.data);
         msgInstance === null || msgInstance === void 0 ? void 0 : msgInstance.handle();
     });
     ws.addEventListener("close", ({ code }) => {
@@ -273,7 +258,6 @@ function schedule() {
                         // Send the work message
                         const msg = new WorkMessage_1.WorkMessage(socket, JSON.stringify(data));
                         msg.handle();
-                        //await deviceRepo.setStatus(dev.id, "busy");
                         // construct device mesh of network
                         yield deviceRepo.connectDeviceToTask(dev.id, minTask.id, dev.number);
                         // connect working devices to their task
@@ -307,7 +291,6 @@ function schedule2(data) {
         });
         const metadataTFLite = yield (0, s3_request_presigner_1.getSignedUrl)(s3, commandTFLite, { expiresIn: Number(process.env.S3_URL_EXPIRY) });
         for (let [i, dev] of devicesList.entries()) {
-            //console.log("dev",dev);
             //  Get device socket
             let otherDevicesList = devicesList.map((d) => ({ number: d.number, address: d.address })).sort((a, b) => a.number - b.number);
             //console.log("other",otherDevicesList)
@@ -329,12 +312,10 @@ function schedule2(data) {
                 is_tf_lite: data.is_tf_lite,
                 tf_lite_metadata: metadataTFLite,
             };
-            //console.log("data1",data1)
             if (socket) {
                 // Send the work message
                 const msg = new WorkMessage_1.WorkMessage(socket, JSON.stringify(data1));
                 msg.handle();
-                //await deviceRepo.setStatus(dev.id, "busy");
                 // construct device mesh of network
                 yield deviceRepo.connectDeviceToTask(dev.id, data.task_name, dev.number);
                 // connect working devices to their task
