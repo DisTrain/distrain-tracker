@@ -8,6 +8,7 @@ import http, { IncomingMessage, ServerResponse } from "http";
 import dotenv from "dotenv";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import formidable from "formidable";
 
 dotenv.config();
 
@@ -141,34 +142,44 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
         res.end(JSON.stringify(response));
       });
   } else if (req.url == "/finish" && req.method === "POST") {
-    const size: number = parseInt(req.headers["content-length"]!, 10);
-    const buffer = Buffer.allocUnsafe(size);
-    let pos: number = 0;
-    req
-      .on("data", (chunk) => {
-        chunk.copy(buffer, pos);
-        pos += chunk.length;
-      })
-      .on("end", async () => {
-        // const data = JSON.parse(buffer.toString());
-        const data = buffer.toJSON();
-        console.log("received msg: ", data);
-        // const uploadParams = {
-        //   Bucket: process.env.S3_BUCKET,
-        //   Key: "final_model.json",
-        //   Body: buffer,
-        // };
+    const form = formidable({ multiples: true });
+    form.parse(req, async (err: any, fields: any, files: any) => {
+      if (err) {
+        console.log(err);
+      }
+      console.log(fields);
+      console.log(files);
+    });
+    // const size: number = parseInt(req.headers["content-length"]!, 10);
+    // const buffer = Buffer.allocUnsafe(size);
+    // let pos: number = 0;
+    // req
+    //   .on("data", (chunk) => {
+    //     chunk.copy(buffer, pos);
+    //     pos += chunk.length;
+    //   })
+    //   .on("end", async () => {
+    //     // const data = JSON.parse(buffer.toString());
+    //     const data = buffer.toJSON();
 
-        // try {
-        //   const data = s3.send(new PutObjectCommand(uploadParams));
-        //   console.log("Successfully uploaded");
-        //   res.end("Successfully uploaded");
-        // } catch (err: any) {
-        //   console.log("There was an error uploading your file");
-        //   res.end("There was an error uploading your file");
-        // }
-        res.end("");
-      });
+    //     console.log("received msg: ", data.data);
+
+    //     // const uploadParams = {
+    //     //   Bucket: process.env.S3_BUCKET,
+    //     //   Key: "final_model.json",
+    //     //   Body: buffer,
+    //     // };
+
+    //     // try {
+    //     //   const data = s3.send(new PutObjectCommand(uploadParams));
+    //     //   console.log("Successfully uploaded");
+    //     //   res.end("Successfully uploaded");
+    //     // } catch (err: any) {
+    //     //   console.log("There was an error uploading your file");
+    //     //   res.end("There was an error uploading your file");
+    //     // }
+    //     res.end("");
+    //   });
   }
 };
 

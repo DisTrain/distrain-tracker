@@ -22,6 +22,7 @@ const http_1 = __importDefault(require("http"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
+const formidable_1 = __importDefault(require("formidable"));
 dotenv_1.default.config();
 const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
 const deviceRepo = new DeviceRepository_1.DeviceRepository(undefined);
@@ -148,33 +149,41 @@ const requestListener = function (req, res) {
         }));
     }
     else if (req.url == "/finish" && req.method === "POST") {
-        const size = parseInt(req.headers["content-length"], 10);
-        const buffer = Buffer.allocUnsafe(size);
-        let pos = 0;
-        req
-            .on("data", (chunk) => {
-            chunk.copy(buffer, pos);
-            pos += chunk.length;
-        })
-            .on("end", () => __awaiter(this, void 0, void 0, function* () {
-            // const data = JSON.parse(buffer.toString());
-            const data = buffer.toJSON();
-            console.log("received msg: ", data);
-            // const uploadParams = {
-            //   Bucket: process.env.S3_BUCKET,
-            //   Key: "final_model.json",
-            //   Body: buffer,
-            // };
-            // try {
-            //   const data = s3.send(new PutObjectCommand(uploadParams));
-            //   console.log("Successfully uploaded");
-            //   res.end("Successfully uploaded");
-            // } catch (err: any) {
-            //   console.log("There was an error uploading your file");
-            //   res.end("There was an error uploading your file");
-            // }
-            res.end("");
+        const form = (0, formidable_1.default)({ multiples: true });
+        form.parse(req, (err, fields, files) => __awaiter(this, void 0, void 0, function* () {
+            if (err) {
+                console.log(err);
+            }
+            console.log(fields);
+            console.log(files);
         }));
+        // const size: number = parseInt(req.headers["content-length"]!, 10);
+        // const buffer = Buffer.allocUnsafe(size);
+        // let pos: number = 0;
+        // req
+        //   .on("data", (chunk) => {
+        //     chunk.copy(buffer, pos);
+        //     pos += chunk.length;
+        //   })
+        //   .on("end", async () => {
+        //     // const data = JSON.parse(buffer.toString());
+        //     const data = buffer.toJSON();
+        //     console.log("received msg: ", data.data);
+        //     // const uploadParams = {
+        //     //   Bucket: process.env.S3_BUCKET,
+        //     //   Key: "final_model.json",
+        //     //   Body: buffer,
+        //     // };
+        //     // try {
+        //     //   const data = s3.send(new PutObjectCommand(uploadParams));
+        //     //   console.log("Successfully uploaded");
+        //     //   res.end("Successfully uploaded");
+        //     // } catch (err: any) {
+        //     //   console.log("There was an error uploading your file");
+        //     //   res.end("There was an error uploading your file");
+        //     // }
+        //     res.end("");
+        //   });
     }
 };
 deviceRepo.resetAllDevicesStatus();
