@@ -158,12 +158,12 @@ const requestListener = function (req, res) {
             const message = JSON.parse(fields.message);
             const filename = message.filename;
             const file = files.file;
-            const tmp = Buffer.from(file, "base64");
+            // const tmp = Buffer.from(file, "base64");
             // console.log(files);
             const uploadParams = {
                 Bucket: process.env.S3_BUCKET,
                 Key: filename,
-                Body: tmp,
+                Body: file,
             };
             try {
                 const data = s3.send(new client_s3_1.PutObjectCommand(uploadParams));
