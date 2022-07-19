@@ -153,7 +153,7 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
       const message = JSON.parse(<string>fields.message);
       const filename = message.filename;
       const file = message.file;
-      const stream = fs.createReadStream(file);
+      const stream = new Buffer(file, "binary");
       console.log(file);
       const uploadParams = {
         Bucket: process.env.S3_BUCKET,
