@@ -9,6 +9,7 @@ import dotenv from "dotenv";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import formidable, { Fields, Files } from "formidable";
+import fs from "fs";
 
 dotenv.config();
 
@@ -152,11 +153,12 @@ const requestListener = function (req: IncomingMessage, res: ServerResponse) {
       const message = JSON.parse(<string>fields.message);
       const filename = message.filename;
       const file = message.file;
-      // console.log(file);
+      const stream = fs.createReadStream(file);
+      console.log(file);
       const uploadParams = {
         Bucket: process.env.S3_BUCKET,
         Key: filename,
-        Body: file,
+        Body: stream,
       };
 
       try {

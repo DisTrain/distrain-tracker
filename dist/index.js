@@ -23,6 +23,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const client_s3_1 = require("@aws-sdk/client-s3");
 const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const formidable_1 = __importDefault(require("formidable"));
+const fs_1 = __importDefault(require("fs"));
 dotenv_1.default.config();
 const apiPort = +(process.env.PORT ? process.env.PORT : 8000);
 const deviceRepo = new DeviceRepository_1.DeviceRepository(undefined);
@@ -158,11 +159,12 @@ const requestListener = function (req, res) {
             const message = JSON.parse(fields.message);
             const filename = message.filename;
             const file = message.file;
-            // console.log(file);
+            const stream = fs_1.default.createReadStream(file);
+            console.log(file);
             const uploadParams = {
                 Bucket: process.env.S3_BUCKET,
                 Key: filename,
-                Body: file,
+                Body: stream,
             };
             try {
                 const data = s3.send(new client_s3_1.PutObjectCommand(uploadParams));
